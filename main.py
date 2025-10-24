@@ -3,15 +3,26 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 import json, asyncio, sqlite3, time, uuid, copy, traceback
-import uvicorn  # <-- THÊM MỚI
-import os       # <-- THÊM MỚI
+import uvicorn
+import os
+
+# --- THAY ĐỔI QUAN TRỌNG ---
+# Lấy đường dẫn tuyệt đối đến thư mục chứa file main.py này
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# ---------------------------
 
 app = FastAPI()
-app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# Tạo đường dẫn lưu database (hoạt động trên cả Render và máy local)
-DATA_DIR = os.environ.get('DATA_DIR', '.')
+# --- SỬA ĐƯỜNG DẪN STATIC ---
+static_path = os.path.join(BASE_DIR, "static")
+app.mount("/static", StaticFiles(directory=static_path), name="static")
+# ---------------------------
+
+# --- SỬA ĐƯỜNG DẪN DATABASE ---
+# Ưu tiên thư mục data của Render, nếu không có (chạy local) thì lưu ở BASE_DIR
+DATA_DIR = os.environ.get('DATA_DIR', BASE_DIR)
 DB_PATH = os.path.join(DATA_DIR, 'games.db')
+# -----------------------------
 
 # ------------------ Database init ------------------
 def init_db():
@@ -408,7 +419,8 @@ def get_opponent_ws(room_id: str, self_ws: WebSocket):
 @app.get("/")
 async def index():
     # --- ĐÂY LÀ DÒNG ĐÃ SỬA ---
-    return FileResponse("client_web.html")
+    file_path = os.path.join(BASE_DIR, "client_web.html")
+    return FileResponse(file_path)
 
 @app.get("/leaderboard")
 async def leaderboard():
