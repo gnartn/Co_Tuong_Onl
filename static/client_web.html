@@ -159,7 +159,14 @@
       playerName=document.getElementById("player").value;
       if(!playerName){ alert("Vui lòng nhập tên"); return; }
 
-      ws=new WebSocket("ws://localhost:8000/ws");
+      // --- ĐÂY LÀ PHẦN ĐÃ SỬA ---
+      const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+      const host = window.location.host;
+      const wsUrl = `${protocol}://${host}/ws`;
+      console.log("Connecting to:", wsUrl); // Để debug
+      ws = new WebSocket(wsUrl);
+      // --- KẾT THÚC PHẦN SỬA ---
+
       ws.onopen=()=>{
         ws.send(JSON.stringify({type:"join_lobby", player:playerName}));
         document.getElementById("loginView").style.display="none";
