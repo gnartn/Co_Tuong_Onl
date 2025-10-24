@@ -3,11 +3,15 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 import json, asyncio, sqlite3, time, uuid, copy, traceback
+import uvicorn  # <-- THÊM MỚI
+import os       # <-- THÊM MỚI
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-DB_PATH = "games.db"
+# Tạo đường dẫn lưu database (hoạt động trên cả Render và máy local)
+DATA_DIR = os.environ.get('DATA_DIR', '.')
+DB_PATH = os.path.join(DATA_DIR, 'games.db')
 
 # ------------------ Database init ------------------
 def init_db():
@@ -403,7 +407,8 @@ def get_opponent_ws(room_id: str, self_ws: WebSocket):
 # ------------------ HTTP routes ------------------
 @app.get("/")
 async def index():
-    return FileResponse("static/client_web.html")
+    # --- ĐÂY LÀ DÒNG ĐÃ SỬA ---
+    return FileResponse("client_web.html")
 
 @app.get("/leaderboard")
 async def leaderboard():
@@ -677,3 +682,11 @@ async def websocket_endpoint(websocket: WebSocket):
         print(f"[WS] Exception for {player_name}: {e}")
         traceback.print_exc()
         await cleanup_player(websocket)
+
+# --- ĐÂY LÀ PHẦN CODE MỚI THÊM VÀO CUỐI FILE ---
+# Nó cho phép bạn chạy file bằng lệnh `python main.py`
+# và tự động lấy PORT từ môi trường (như Render)
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8000))
+    print(f"--- Starting server on 0.0.0.0:{port} ---")
+    uvicorn.run(app, host="0.0.0.0", port=port)
