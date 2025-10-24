@@ -1,14 +1,22 @@
-# Python
+﻿# Python cache & virtual env
 __pycache__/
 *.pyc
-
-# Database
-*.db
-*.sqlite3
-
-# Môi trường ảo (nếu bạn có dùng)
-venv/
+*.pyo
+*.pyd
 .venv/
+venv/
+env/
 
-# File môi trường
-.env
+# Database và file runtime
+games.db
+
+# VSCode
+.vscode/
+
+# Logs và tạm
+*.log
+*.tmp
+
+# Render hoặc build output
+*.sqlite3
+*.db-journal
